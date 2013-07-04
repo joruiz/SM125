@@ -1,3 +1,10 @@
+/*
+  SimpleRead
+  Read RFID tag Id.
+ 
+  This example code is in the public domain.
+ */
+ 
 #include <Wire.h>
 #include <SM125.h>
 
@@ -19,10 +26,12 @@ void loop() {
   delay(500);
   if (sm125.readTag(tagId)){
     Serial.print("Tag leido: ");
-    Serial.print(tagId[0], HEX);
-    Serial.print(tagId[1], HEX);
-    Serial.print(tagId[2], HEX);
-    Serial.println(tagId[3], HEX);
+    for (int i = 0; i < 4; i++){
+      if (tagId[i] < 16)
+        Serial.print('0');
+      Serial.print(tagId[i], HEX);
+    }
+    Serial.println();
   }
   else
     Serial.println("No Tag");

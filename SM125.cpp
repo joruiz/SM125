@@ -1,63 +1,55 @@
+/*
+ Arduino Library for Sonmicro SM125 RFID reader (over I2C protocol)
+ go to http://www.sonmicro.com/en/index.php?option=com_content&view=article&id=48&Itemid=64 for more information
+ 
+ License: CC BY-SA 3.0: Creative Commons Share-alike 3.0. Feel free 
+ to use and abuse this code however you'd like. If you find it useful
+ please attribute, and SHARE-ALIKE!
+ 
+ Created July 2013
+ by Jonathan Ruiz de Garibay
+
+ */ 
+
 #include "Arduino.h"
 #include "SM125.h"
-#include "Wire.h"
+#include <Wire.h>
 
 //#define SM125_DEBUG
 
-int _address;
-uint8_t _outputValues = 0x00;
-
+//
+// begin
+//
+// This library use I2C protocol so, it is necesary to specified an I2C address.
 boolean SM125::begin(uint8_t address){
 
+	//save address, init outputs and I2C
 	_address = address;
+	_outputValues = 0x00;
 	Wire.begin();
-
-/*	//se envia el comando de lectura
-	Wire.beginTransmission(_address);
-	Wire.write(0x10);
-	Wire.write(0x03);
-	Wire.write(0x02);
-	Wire.write(0x00);
-	Wire.write(0x00);
-	Wire.write(0x00);
-	Wire.write(0x00);
-	Wire.write(0x15);
-	Wire.requestFrom(_address, 1);
-	Wire.endTransmission();
-
-	delay(1);
-	if ((Wire.available() == 1) && (Wire.read() == 0x6B){
-#ifdef SM125_DEBUG
-	Serial.println("Read Mode Enabled");
-#endif
-		return true;
-	}
-	else{
-#ifdef SM125_DEBUG
-	Serial.println("Init Error");
-#endif
-		return false;
-	}*/
 }
 
+//
+// readTag
+//
+// Read a RFID tag and return true or false if there is a tag or not, respectively.
 boolean SM125::readTag(byte *tagId){
 
-	//primero se lee el estado del lector RFID para saber si hay algo esperando
+	//first, read SM125 state
 	Wire.beginTransmission(_address);
-	Wire.write(0x52);
+	Wire.write(READ_TAG);
 	Wire.requestFrom(_address, 1);
 	Wire.endTransmission();
 
 	delay(1);
-	if ((Wire.available() == 1) && (Wire.read() == 0x6E)){
+	if ((Wire.available() == 1) && (Wire.read() == DATA_READY)){
 		
-		//se obtienen los primeros 5 bytes
+		//read 5 bytes; the first and the last are unused
 		Wire.requestFrom(_address, 5);
 		Wire.endTransmission();
 		
 		delay(1);
 		if (Wire.available() == 5){
-			//el primero es siempre 1
 			Wire.read();
 			tagId[0] = Wire.read();
 #ifdef SM125_DEBUG
@@ -74,11 +66,10 @@ boolean SM125::readTag(byte *tagId){
 	Serial.print("Data 2: ");
 	Serial.println(tagId[2], HEX);
 #endif
-			//el último indica si hay más bytes a recibir, en nuestro caso siempre
 			Wire.read();
 		}
 
-		//se obtienen los últimos 5 bytes
+		//read 5 bytes; only the first one is needed
 		Wire.requestFrom(_address, 5);
 		Wire.endTransmission();
 		
@@ -105,9 +96,13 @@ boolean SM125::readTag(byte *tagId){
 	}
 }
 
+//
+// writeOutput
+//
+// Set sm125 outputs pin to high or low.
 void SM125::writeOutput(uint8_t output, uint8_t value){
 
-	//se obtiene el estado de las salidas
+	//get the new output status
 	uint8_t tempValues = 0x00;
 	if (output == 0){
 		if (value == HIGH)
@@ -122,11 +117,12 @@ void SM125::writeOutput(uint8_t output, uint8_t value){
 	else
 		tempValues = tempValues & _outputValues;
 
-	//se obtiene el checksum
-	uint8_t checksum = 0x62 + tempValues;
-	//se envia el comando
+	//calculate the checksum
+	uint8_t checksum = WRITE_OUTPUT + tempValues;
+
+	//send command
 	Wire.beginTransmission(_address);
-	Wire.write(0x62);
+	Wire.write(WRITE_OUTPUT);
 	Wire.write(tempValues);
 	Wire.write(0x00);
 	Wire.write(0x00);
@@ -140,7 +136,7 @@ void SM125::writeOutput(uint8_t output, uint8_t value){
 	delay(1);
 	if (Wire.available() == 1){
 		byte request = Wire.read();
-		if (request == 0x6F){
+		if (request == COMMAND_OK){
 #ifdef SM125_DEBUG
 	Serial.println("Output Updated");
 #endif
@@ -149,25 +145,30 @@ void SM125::writeOutput(uint8_t output, uint8_t value){
 	}
 }
 
+//
+// readInput
+//
+// Get the state of the sm125 input pin.
 boolean SM125::readInput(){
 
-	//se envia el comando
+	//Send command
 	Wire.beginTransmission(_address);
-	Wire.write(0x63);
+	Wire.write(READ_INPUT);
 	Wire.write(0x00);
 	Wire.write(0x00);
 	Wire.write(0x00);
 	Wire.write(0x00);
 	Wire.write(0x00);
 	Wire.write(0x00);
-	Wire.write(0x63);
+	Wire.write(READ_INPUT);
 	Wire.requestFrom(_address, 1);
 	Wire.endTransmission();
 
+	//read reply and evaluate
 	delay(1);
 	if (Wire.available() == 1){
 		byte request = Wire.read();
-		if (request == 0x70){
+		if (request == INPUT_LOW){
 #ifdef SM125_DEBUG
 	Serial.println("Input LOW");
 #endif

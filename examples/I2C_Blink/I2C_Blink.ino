@@ -1,3 +1,10 @@
+/*
+  Blink
+  Blink SM125 output pin 1.
+ 
+  This example code is in the public domain.
+ */
+
 #include <Wire.h>
 #include <SM125.h>
 
@@ -15,8 +22,10 @@ void setup() {
 
 void loop() {
 
-  sm125.writeOutput(1, 1);
+  sm125.writeOutput(1, HIGH);
+  Serial.println("Output 1: HIGH");
   delay(200);
-  sm125.writeOutput(1, 0);
+  sm125.writeOutput(1, LOW);
+  Serial.println("Output 1: LOW");
   delay(600);
 }

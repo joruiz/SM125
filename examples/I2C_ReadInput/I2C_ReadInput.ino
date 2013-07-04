@@ -1,10 +1,16 @@
+/*
+  ReadInput
+  Read sm125 input pin.
+ 
+  This example code is in the public domain.
+ */
+ 
 #include <Wire.h>
 #include <SM125.h>
 
 #define SM125_ADDRESS 0x46
 
 SM125 sm125;
-byte tagId[4];
 
 void setup() {
   
@@ -17,7 +23,7 @@ void setup() {
 void loop() {
 
   delay(500);
-  Serial.print("Input state: ");
+  Serial.print("Input: ");
   if (sm125.readInput() == HIGH){
     Serial.println("HIGH");
   }
