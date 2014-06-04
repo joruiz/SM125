@@ -25,8 +25,31 @@ boolean SM125::begin(uint8_t address){
 
 	//save address, init outputs and I2C
 	_address = address;
+	_dreadyPin = 0xFF;
 	_outputValues = 0x00;
 	Wire.begin();
+}
+
+boolean SM125::begin(uint8_t address, uint8_t dreadyPin){
+
+	//save address, init outputs and I2C
+	_address = address;
+	_dreadyPin = dreadyPin;
+	pinMode(_dreadyPin, INPUT);
+	_outputValues = 0x00;
+	Wire.begin();
+}
+
+//
+// anyTag
+//
+// Check Dready pin from sm125 module and return true if this pin is active
+// This function need pin Dready is declared
+boolean SM125::anyTag() {
+
+	if (_dreadyPin == 0xFF)
+		return false;
+	return digitalRead(_dreadyPin);
 }
 
 //
@@ -149,7 +172,7 @@ void SM125::writeOutput(uint8_t output, uint8_t value){
 // readInput
 //
 // Get the state of the sm125 input pin.
-boolean SM125::readInput(){
+uint8_t SM125::readInput(){
 
 	//Send command
 	Wire.beginTransmission(_address);
@@ -172,13 +195,14 @@ boolean SM125::readInput(){
 #ifdef SM125_DEBUG
 	Serial.println("Input LOW");
 #endif
-			return LOW;
+			return 0x00;
 		}
 		else{
 #ifdef SM125_DEBUG
 	Serial.println("Input HIGH");
 #endif
-			return HIGH;
+			return 0x01;
 		}
 	}
+	return 0xFF;
 }

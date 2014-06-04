@@ -29,12 +29,15 @@ class SM125
 {
 	public:
 		boolean begin(uint8_t address);
+		boolean begin(uint8_t address, uint8_t dreadyPin);
+		boolean anyTag();
 		boolean readTag(byte *tagId);
 		void writeOutput(uint8_t output, uint8_t value);
-		boolean readInput();
+		uint8_t readInput();
 
 	private:
 		int _address;
+		uint8_t _dreadyPin;
 		uint8_t _outputValues;
 };
 
