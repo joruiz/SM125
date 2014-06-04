@@ -24,9 +24,9 @@ void loop() {
 
   delay(500);
   Serial.print("Input: ");
-  if (sm125.readInput() == HIGH){
+  byte value = sm125.readInput();
+  if (value == HIGH)
     Serial.println("HIGH");
-  }
   else
     Serial.println("LOW");
 }
