@@ -11,31 +11,34 @@
 
  */ 
 
-#ifndef SM125_h
-#define SM125_h
+#ifndef CLIENT_H
+#define CLIENT_H
 
 #include "Arduino.h"
 
-#define READ_TAG		0x52
-#define WRITE_OUTPUT	0x62
-#define READ_INPUT		0x63
 
-#define COMMAND_OK		0x6F
-#define DATA_READY		0x6E
-#define INPUT_LOW		0x70
-#define INPUT_HIGH		0x71
-
-class SM125
+class Client
 {
 	public:
-		boolean begin(uint8_t address);
-		boolean readTag(byte *tagId);
-		void writeOutput(uint8_t output, uint8_t value);
-		boolean readInput();
+		Client(uint8_t *ip, uint16_t port);
+		boolean connect();
+		boolean isConnected();
+		void close();
+		void write(byte value);
+		void write(const char *str);
+		void writeln(const char *str);
+		
+		int available();
+		byte readByte();
+		String readln();
+		void flush();
 
 	private:
-		int _address;
-		uint8_t _outputValues;
+		uint8_t *_ip;
+		uint16_t _port;
+		
+		bool isOpen;
+
 };
 
 #endif
