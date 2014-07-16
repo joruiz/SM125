@@ -21,7 +21,7 @@
  */
 
 #define SM125_ADDRESS 0x46
-#define DREADY 7
+#define DREADY 2
 
 SM125 sm125;
 String tagId;
@@ -41,10 +41,7 @@ void loop() {
 
   if (digitalRead(DREADY) == HIGH) {
     tagId = sm125.readTag();
-    if (!tagId.equals(""))
-      Serial.println("Tag leido: " + tagId);
-    else
-      Serial.println("No Tag");
+    Serial.println("Tag leido: " + tagId);
   }
   delay(10);
 }
