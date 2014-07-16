@@ -11,7 +11,7 @@
 #define SM125_ADDRESS 0x46
 
 SM125 sm125;
-byte tagId[4];
+String tagId;
 
 void setup() {
   
@@ -24,15 +24,9 @@ void setup() {
 void loop() {
 
   delay(500);
-  if (sm125.readTag(tagId)){
-    Serial.print("Tag leido: ");
-    for (int i = 0; i < 4; i++){
-      if (tagId[i] < 16)
-        Serial.print('0');
-      Serial.print(tagId[i], HEX);
-    }
-    Serial.println();
-  }
+  tagId = sm125.readTag();
+  if (!tagId.equals(""))
+    Serial.println("Tag leido: " + tagId);
   else
     Serial.println("No Tag");
 }

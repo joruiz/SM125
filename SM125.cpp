@@ -56,8 +56,10 @@ boolean SM125::anyTag() {
 // readTag
 //
 // Read a RFID tag and return true or false if there is a tag or not, respectively.
-boolean SM125::readTag(byte *tagId){
+String SM125::readTag(){
 
+	String tagId = "";
+	byte data;
 	//first, read SM125 state
 	Wire.beginTransmission(_address);
 	Wire.write(READ_TAG);
@@ -74,20 +76,23 @@ boolean SM125::readTag(byte *tagId){
 		delay(1);
 		if (Wire.available() == 5){
 			Wire.read();
-			tagId[0] = Wire.read();
+			data = Wire.read();
+			tagId += toHexString(data);
 #ifdef SM125_DEBUG
 	Serial.print("Data 0: ");
-	Serial.println(tagId[0], HEX);
+	Serial.println(data, HEX);
 #endif
-			tagId[1] = Wire.read();
+			data = Wire.read();
+			tagId += toHexString(data);
 #ifdef SM125_DEBUG
 	Serial.print("Data 1: ");
-	Serial.println(tagId[1], HEX);
+	Serial.println(data, HEX);
 #endif
-			tagId[2] = Wire.read();
+			data = Wire.read();
+			tagId += toHexString(data);
 #ifdef SM125_DEBUG
 	Serial.print("Data 2: ");
-	Serial.println(tagId[2], HEX);
+	Serial.println(data, HEX);
 #endif
 			Wire.read();
 		}
@@ -98,10 +103,11 @@ boolean SM125::readTag(byte *tagId){
 		
 		delay(1);
 		if (Wire.available() == 5){
-			tagId[3] = Wire.read();
+			data = Wire.read();
+			tagId += toHexString(data);
 #ifdef SM125_DEBUG
 	Serial.print("Data 3: ");
-	Serial.println(tagId[3], HEX);
+	Serial.println(data, HEX);
 #endif
 			//el resto de bytes no se usan
 			Wire.read();
@@ -109,14 +115,13 @@ boolean SM125::readTag(byte *tagId){
 			Wire.read();
 			Wire.read();
 		}
-		return true;
 	}
 	else{
 #ifdef SM125_DEBUG
 	Serial.println("No tag available");
 #endif
-		return false;
 	}
+	return tagId;
 }
 
 //
@@ -205,4 +210,14 @@ uint8_t SM125::readInput(){
 		}
 	}
 	return 0xFF;
+}
+
+String SM125::toHexString(byte value) {
+
+	String data = "";
+	if (value < 16)
+		data += "0";
+	data += String(value, HEX);
+	data.toUpperCase();
+	return data;
 }
